@@ -70,17 +70,11 @@ enum HomeIndex {
 
         func homePageCTA() -> Node<HTML.BodyContext> {
             .section(
-                .panelButton(cssClass: "rfs6",
-                             linkUrl: SiteURL.readyForSwift6.relativeURL(),
-                             bodyNode: .group(
-                                .p(
-                                    .strong("Are the packages you use safe from data races?"),
-                                    .text(" "),
-                                    .text("We’re tracking progress towards data race safety with Swift 6. Find out which packages are “Ready for Swift 6” and check for packages marked as “Safe from data races” when browsing the index.")
-                                )
-                             ),
-                             cta: "Track Progress",
-                             analyticsEvent: "Home - Ready for Swift 6 CTA")
+                .panelButton(cssClass: "podcast",
+                             linkUrl: ExternalURL.podcast,
+                             bodyNode: .podcastPanelBody(includeHeading: false),
+                             cta: "Listen Now",
+                             analyticsEvent: "Home - Podcast CTA")
             )
         }
 
@@ -109,7 +103,24 @@ enum HomeIndex {
                              analyticsEvent: "Home - Supporters CTA"),
                 .group(
                     Supporters.corporate.shuffled().map(\.advertisementNode)
-                )
+                ),
+                .if(Supporters.corporate.count < 2, .div(
+                    .class("ccta-availability"),
+                    .p(
+                        .class("support"),
+                        .text("Support the Swift Package Index")
+                    ),
+                    .p(
+                        .text("We have one homepage sponsorship spot available. Support the project while promoting your company.")
+                        ),
+                    .p(
+                        .class("cta"),
+                        .a(
+                            .href(ExternalURL.contactMailto),
+                            .text("Get in touch for details →")
+                        )
+                    )
+                ))
             )
         }
 

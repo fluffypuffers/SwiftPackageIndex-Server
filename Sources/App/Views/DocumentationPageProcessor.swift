@@ -169,9 +169,13 @@ struct DocumentationPageProcessor {
             Breadcrumb(title: packageName, url: SiteURL.package(.value(repositoryOwner), .value(repositoryName), .none).relativeURL()),
             Breadcrumb(title: .init(
                 .text("Documentation for "),
-                .span(
-                    .class(referenceKind.cssClass),
-                    .text(docVersion.reference)
+                .div(
+                    .class("reference"),
+                    .span(
+                        .class(referenceKind.cssClass),
+                        .text(docVersion.reference)
+                    ),
+                    latestBadge()
                 )
             ), choices: documentationVersionChoices.count > 0 ? documentationVersionChoices : nil)
         ]
@@ -244,6 +248,14 @@ struct DocumentationPageProcessor {
         ).render()
     }
 
+    func latestBadge() -> Plot.Node<HTML.BodyContext> {
+        let isLatest = availableVersions.first(where: { $0.reference == docVersion.reference })?.isLatestStable ?? false
+        return isLatest ? .span(
+            .class("badge"),
+            .text("LATEST")
+        ) : .empty
+    }
+
     var footer: String {
         @Dependency(\.environment) var environment
         return Plot.Node.footer(
@@ -268,19 +280,37 @@ struct DocumentationPageProcessor {
                         .li(
                             .a(
                                 .href(SiteURL.privacy.relativeURL()),
-                                "Privacy and Cookies"
+                                "Privacy"
                             )
                         ),
                         .li(
                             .a(
                                 .href("https://swiftpackageindex.statuspage.io"),
-                                "Uptime and System Status"
+                                "System Status"
+                            )
+                        ),
+                        .li(
+                            .a(
+                                .href(SiteURL.buildMonitor.relativeURL()),
+                                "Build System Monitor"
                             )
                         ),
                         .li(
                             .a(
                                 .href(ExternalURL.mastodon),
                                 "Mastodon"
+                            )
+                        ),
+                        .li(
+                            .a(
+                                .href(ExternalURL.podcast),
+                                "Podcast"
+                            )
+                        ),
+                        .li(
+                            .a(
+                                .href(SiteURL.readyForSwift6.relativeURL()),
+                                "Ready for Swift 6"
                             )
                         )
                     )
@@ -383,14 +413,14 @@ struct DocumentationPageProcessor {
                     if !value.lowercased().hasPrefix("/\(owner)/\(repository)/".lowercased()) {
                         // no /{owner}/{repo}/ prefix -> it's a dynamic base url resource, i.e. a "/" resource
                         //   / -> /a/b/~            (current)
-                        try e.attr(attribute, "/\(owner)/\(repository)/\(String.current)\(value)".lowercased())
+                        _ = try e.attr(attribute, "/\(owner)/\(repository)/\(String.current)\(value)".lowercased())
                     } else if let reference {
                         let fullyQualifiedPrefix = "/\(owner)/\(repository)/\(reference)".lowercased()
                         if value.lowercased().hasPrefix(fullyQualifiedPrefix) {
                             // matches expected fully qualified resource path
                             //   /a/b/1.2.3 -> /a/b/~   (current)
                             let trimmed = value.dropFirst(fullyQualifiedPrefix.count)
-                            try e.attr(attribute, "/\(owner)/\(repository)/\(String.current)\(trimmed)".lowercased())
+                            _ = try e.attr(attribute, "/\(owner)/\(repository)/\(String.current)\(trimmed)".lowercased())
                         } else {
                             // did not match expected resource prefix - leave it alone
                             // (shouldn't be possible)
@@ -405,7 +435,7 @@ struct DocumentationPageProcessor {
                     if !value.lowercased().hasPrefix("/\(owner)/\(repository)/".lowercased()) {
                         // no /{owner}/{repo}/ prefix -> it's a dynamic base url resource, i.e. a "/" resource
                         //   / -> /a/b/~            (current)
-                        try e.attr(attribute, "/\(owner)/\(repository)/\(reference)\(value)".lowercased())
+                        _ = try e.attr(attribute, "/\(owner)/\(repository)/\(reference)\(value)".lowercased())
                     } else {
                         // already prefixed resource, leave it alone
                         return

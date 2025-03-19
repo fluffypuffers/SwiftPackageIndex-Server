@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en"><!--Version: test--><!--DB Id: db-id-->
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8"/>
+    <meta property="og:site_name" content="The Swift Package Index"/>
+    <link rel="canonical" href="http://localhost:8080/"/>
+    <meta name="twitter:url" content="http://localhost:8080/"/>
+    <meta property="og:url" content="http://localhost:8080/"/>
+    <title>Build System Monitor &ndash; Swift Package Index</title>
+    <meta name="twitter:title" content="Build System Monitor &ndash; Swift Package Index"/>
+    <meta property="og:title" content="Build System Monitor &ndash; Swift Package Index"/>
+    <meta name="description" content="See what the platform and Swift version compatibility build system for the Swift Package Index is processing. The package index constantly looks for changes in packages and, when found, builds every …"/>
+    <meta name="twitter:description" content="See what the platform and Swift version compatibility build system for the Swift Package Index is processing. The package index constantly looks for changes in packages and, when found, builds every …"/>
+    <meta property="og:description" content="See what the platform and Swift version compatibility build system for the Swift Package Index is processing. The package index constantly looks for changes in packages and, when found, builds every …"/>
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:image" content="http://localhost:8080/images/logo.png"/>
+    <meta property="og:image" content="http://localhost:8080/images/logo.png"/>
+    <link rel="shortcut icon" href="/images/logo-tiny.png" type="image/png"/>
+    <link rel="alternate" type="application/rss+xml" title="Swift Package Index Blog" href="http://localhost:8080/blog/feed.xml"/>
+    <link rel="alternate" type="application/rss+xml" title="Swift Package Index – Recently Added Packages" href="http://localhost:8080/packages.rss"/>
+    <link rel="alternate" type="application/rss+xml" title="Swift Package Index – Recent Package Releases" href="http://localhost:8080/releases.rss"/>
+    <link rel="alternate" type="application/rss+xml" title="Swift Package Index – Recent Major Package Releases" href="http://localhost:8080/releases.rss?major=true"/>
+    <link rel="alternate" type="application/rss+xml" title="Swift Package Index – Recent Major & Minor Package Releases" href="http://localhost:8080/releases.rss?major=true&minor=true"/>
+    <link rel="alternate" type="application/rss+xml" title="Swift Package Index – Recent Package Pre-Releases" href="http://localhost:8080/releases.rss?pre=true"/>
+    <link rel="stylesheet" href="/shared.css?test" data-turbolinks-track="reload"/>
+    <link rel="stylesheet" href="/main.css?test" data-turbolinks-track="reload"/>
+    <script src="/shared.js?test" data-turbolinks-track="reload" defer></script>
+    <script src="/main.js?test" data-turbolinks-track="reload" defer></script><script async defer data-domain="swiftpackageindex.com" src="https://plausible.io/js/plausible.outbound-links.js"></script>
+<script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+  </head>
+  <body>
+    <header>
+      <div class="inner">
+        <a href="/">
+          <h1>
+            <img alt="The Swift Package Index logo." src="/images/logo.svg"/>Swift Package Index
+          </h1>
+        </a>
+        <nav>
+          <ul>
+            <li>
+              <a class="supporters" href="/supporters">Supporters</a>
+            </li>
+            <li>
+              <a href="/add-a-package">Add a Package</a>
+            </li>
+            <li>
+              <a href="/blog">Blog</a>
+            </li>
+            <li>
+              <a href="/faq">FAQ</a>
+            </li>
+            <li class="search">
+              <form action="/search">
+                <input id="query" name="query" type="search" placeholder="Search" spellcheck="false" autocomplete="off" data-gramm="false" data-focus="false"/>
+                <button type="submit">
+                  <div title="Search"></div>
+                </button>
+              </form>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <p class="announcement">Track the adoption of Swift 6 strict concurrency checks for data race safety. How many packages are 
+      <a href="/ready-for-swift-6">Ready for Swift 6</a>?
+    </p>
+    <nav class="breadcrumbs">
+      <div class="inner">
+        <ul>
+          <li>
+            <a href="/">
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <span>Build System Monitor</span>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <main>
+      <div class="inner">
+        <h2>Recent Builds</h2>
+        <p>The Swift Package Index determines Swift version and platform compatibility by running multiple builds against each version of every package. If you're curious which packages are currently processing through the build system, this list shows all recent build activity.</p>
+        <div class="build-monitor">
+          <a href="/builds/5974D34D-B2B9-4CDB-9580-E1AC74CB579D">
+            <div class="row">
+              <div class="package-name">
+                <h3>Leftpad
+                  <span> by Dave Verwer</span>
+                </h3>
+              </div>
+              <div class="status ok">
+                <span>Successful</span>
+                <small>1 hour ago</small>
+              </div>
+              <div class="reference">
+                <span class="stable">1.0.0</span>
+              </div>
+              <div>Swift 5.6</div>
+              <div>macOS (Xcode)</div>
+            </div>
+          </a>
+          <a href="/builds/E879173A-DC19-4949-8014-F7B6DAFBF0CE">
+            <div class="row">
+              <div class="package-name">
+                <h3>Rester
+                  <span> by Sven A. Schmidt</span>
+                </h3>
+              </div>
+              <div class="status failed">
+                <span>Failed</span>
+                <small>2 hours ago</small>
+              </div>
+              <div class="reference">
+                <span class="beta">1.0.0-beta1</span>
+              </div>
+              <div>Swift 5.6</div>
+              <div>Linux</div>
+            </div>
+          </a>
+          <a href="/builds/85B10001-0F52-4560-BDA6-A4B11D910675">
+            <div class="row">
+              <div class="package-name">
+                <h3>AccessibilitySnapshotColorBlindness
+                  <span> by James Sherlock</span>
+                </h3>
+              </div>
+              <div class="status other">
+                <span>Triggered</span>
+                <small>3 hours ago</small>
+              </div>
+              <div class="reference">
+                <span class="branch">main</span>
+              </div>
+              <div>Swift 5.5</div>
+              <div>Linux</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <div class="inner">
+        <nav>
+          <ul>
+            <li>
+              <a href="/blog">Blog</a>
+            </li>
+            <li>
+              <a href="https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server">GitHub</a>
+            </li>
+            <li>
+              <a href="/privacy">Privacy</a>
+            </li>
+            <li>
+              <a href="https://swiftpackageindex.statuspage.io">System Status</a>
+            </li>
+            <li>
+              <a href="/build-monitor">Build System Monitor</a>
+            </li>
+            <li>
+              <a href="https://mas.to/@SwiftPackageIndex">Mastodon</a>
+            </li>
+            <li>
+              <a href="https://swiftpackageindexing.transistor.fm">Podcast</a>
+            </li>
+            <li>
+              <a href="/ready-for-swift-6">Ready for Swift 6</a>
+            </li>
+          </ul>
+          <small>The Swift Package Index is entirely funded by community sponsorship. Thank you to 
+            <a href="https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server#funding-and-sponsorship">all our sponsors for their generosity</a>.
+          </small>
+          <small>The Swift Package Index is operated by SPI Operations Limited, a company registered in the UK with company number 13466692.</small>
+          <a rel="me" href="https://mas.to/@SwiftPackageIndex"></a>
+          <a rel="me" href="https://mas.to/@SwiftPackageUpdates"></a>
+        </nav>
+      </div>
+    </footer>
+    <spi-debug-panel class="hidden">
+      <table>
+        <tbody></tbody>
+      </table>
+    </spi-debug-panel>
+  </body>
+</html>

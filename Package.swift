@@ -19,7 +19,7 @@ import PackageDescription
 let package = Package(
     name: "SPI-Server",
     platforms: [
-        .macOS(.v13)
+        .macOS(.v15)
     ],
     products: [
         .executable(name: "Run", targets: ["Run"]),
@@ -27,7 +27,6 @@ let package = Package(
         .library(name: "S3Store", targets: ["S3Store"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/0xLeif/Cache.git", from: "2.1.0"),
         .package(url: "https://github.com/JohnSundell/Ink.git", from: "0.5.1"),
         .package(url: "https://github.com/swift-server/swift-prometheus.git", from: "1.0.0"),
         .package(url: "https://github.com/SwiftPackageIndex/Plot.git", branch: "main"),
@@ -37,9 +36,8 @@ let package = Package(
         .package(url: "https://github.com/SwiftPackageIndex/SemanticVersion.git", from: "0.3.0"),
         .package(url: "https://github.com/SwiftPackageIndex/ShellOut.git", from: "3.1.4"),
         .package(url: "https://github.com/swiftlang/swift-package-manager.git", branch: "release/5.10"),
-        .package(url: "https://github.com/dankinsoid/VaporToOpenAPI.git", from: "4.4.4"),
         .package(url: "https://github.com/pointfreeco/swift-custom-dump.git", from: "1.0.0"),
-        .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.5.2"),
+        .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.8.0"),
         .package(url: "https://github.com/pointfreeco/swift-parsing.git", from: "0.12.0"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing.git", from: "1.11.1"),
         .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.3.2"),
@@ -48,6 +46,7 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.0.0"),
         .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0"),
         .package(url: "https://github.com/vapor/jwt-kit.git", from: "4.13.0"),
+        .package(url: "https://github.com/vapor/redis.git", from: "4.0.0"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.102.0"),
     ],
     targets: [
@@ -62,7 +61,6 @@ let package = Package(
                     .product(name: "SPIManifest", package: "SPIManifest"),
                     .product(name: "SemanticVersion", package: "SemanticVersion"),
                     .product(name: "SwiftSoup", package: "SwiftSoup"),
-                    .product(name: "Cache", package: "cache"),
                     .product(name: "CanonicalPackageURL", package: "CanonicalPackageURL"),
                     .product(name: "CustomDump", package: "swift-custom-dump"),
                     .product(name: "Dependencies", package: "swift-dependencies"),
@@ -71,11 +69,11 @@ let package = Package(
                     .product(name: "Fluent", package: "fluent"),
                     .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
                     .product(name: "Parsing", package: "swift-parsing"),
+                    .product(name: "Redis", package: "redis"),
                     .product(name: "ShellOut", package: "ShellOut"),
                     .product(name: "SwiftPMDataModel-auto", package: "swift-package-manager"),
                     .product(name: "SwiftPMPackageCollections", package: "swift-package-manager"),
                     .product(name: "Vapor", package: "vapor"),
-                    .product(name: "VaporToOpenAPI", package: "VaporToOpenAPI"),
                     .product(name: "SotoCognitoAuthentication", package: "soto-cognito-authentication")
                 ],
                 swiftSettings: swiftSettings,
@@ -94,6 +92,7 @@ let package = Package(
                 swiftSettings: swiftSettings),
         .testTarget(name: "AppTests",
                     dependencies: [
+                        .product(name: "DependenciesTestSupport", package: "swift-dependencies"),
                         .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
                         .product(name: "InlineSnapshotTesting", package: "swift-snapshot-testing"),
                         .product(name: "XCTVapor", package: "vapor"),

@@ -17,7 +17,6 @@
 import Fluent
 import SQLKit
 import Vapor
-import XCTest
 import NIOConcurrencyHelpers
 
 
@@ -107,4 +106,11 @@ func makeBody(_ data: Data) -> ByteBuffer {
     var buffer: ByteBuffer = ByteBuffer.init(.init())
     buffer.writeBytes(data)
     return buffer
+}
+
+
+extension HTTPClient.Response {
+    static func ok(fixture: String) throws -> Self {
+        try .init(status: .ok, body: .init(data: fixtureData(for: fixture)))
+    }
 }

@@ -12,81 +12,98 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import Foundation
+
 @testable import App
 
 import Dependencies
-import XCTVapor
+import Testing
 
 
-class ErrorReportingTests: AppTestCase {
+extension AllTests.ErrorReportingTests {
 
-    func test_Analyze_recordError() async throws {
-        let pkg = try await savePackage(on: app.db, "1")
-        try await Analyze.recordError(database: app.db,
-                                      error: AppError.cacheDirectoryDoesNotExist(pkg.id, "path"))
-        do {
-            let pkg = try await XCTUnwrapAsync(try await Package.find(pkg.id, on: app.db))
-            XCTAssertEqual(pkg.status, .cacheDirectoryDoesNotExist)
-            XCTAssertEqual(pkg.processingStage, .analysis)
+    @Test func Analyze_recordError() async throws {
+        try await withApp { app in
+            let pkg = try await savePackage(on: app.db, "1")
+            try await Analyze.recordError(database: app.db,
+                                          error: AppError.cacheDirectoryDoesNotExist(pkg.id, "path"))
+            do {
+                let pkg = try #require(try await Package.find(pkg.id, on: app.db))
+                #expect(pkg.status == .cacheDirectoryDoesNotExist)
+                #expect(pkg.processingStage == .analysis)
+            }
         }
     }
 
-    func test_Ingestion_error_reporting() async throws {
-        // setup
-        try await Package(id: .id0, url: "1", processingStage: .reconciliation).save(on: app.db)
-        Current.fetchMetadata = { _, _, _ throws(Github.Error) in throw Github.Error.invalidURL("1") }
+    @Test func Ingestion_error_reporting() async throws {
+        let capturingLogger = CapturingLogger()
+        try await withApp { app in
+            // setup
+            try await Package(id: .id0, url: "1", processingStage: .reconciliation).save(on: app.db)
 
+            try await withDependencies {
+                $0.date.now = .now
+                $0.github.fetchMetadata = { @Sendable _, _ throws(Github.Error) in throw Github.Error.invalidURL("1") }
+                $0.logger = .testLogger(capturingLogger)
+            } operation: {
+                // MUT
+                try await Ingestion.ingest(client: app.client, database: app.db, mode: .limit(10))
+            }
+
+            // validation
+            capturingLogger.logs.withValue {
+                #expect($0 == [.init(level: .warning,
+                                     message: #"Ingestion.Error(\#(UUID.id0), invalidURL(1))"#)])
+            }
+        }
+    }
+
+    @Test func Analyzer_error_reporting() async throws {
+        try await withApp { app in
+            let capturingLogger = CapturingLogger()
+            try await withDependencies {
+                $0.fileManager.fileExists = { @Sendable _ in true }
+                $0.logger = .testLogger(capturingLogger)
+                $0.shell.run = { @Sendable cmd, _ in
+                    if cmd.description == "git tag" { return "1.0.0" }
+                    // returning a blank string will cause an exception when trying to
+                    // decode it as the manifest result - we use this to simulate errors
+                    return "invalid"
+                }
+            } operation: {
+                // setup
+                try await Package(id: .id1, url: "1".asGithubUrl.url, processingStage: .ingestion).save(on: app.db)
+
+                // MUT
+                try await Analyze.analyze(client: app.client, database: app.db, mode: .limit(10))
+
+                // validation
+                capturingLogger.logs.withValue {
+                    #expect($0 == [
+                        .init(level: .critical, message: "updatePackages: unusually high error rate: 1/1 = 100.0%"),
+                        .init(level: .warning, message: #"App.AppError.genericError(Optional(\#(UUID.id1)), "updateRepository: no repository")"#)
+                    ])
+                }
+            }
+        }
+    }
+
+    @Test func invalidPackageCachePath() async throws {
         try await withDependencies {
-            $0.date.now = .now
+            $0.fileManager.fileExists = { @Sendable _ in true }
         } operation: {
-            // MUT
-            try await Ingestion.ingest(client: app.client, database: app.db, mode: .limit(10))
+            try await withApp { app in
+                // setup
+                try await savePackages(on: app.db, ["1", "2"], processingStage: .ingestion)
+
+                // MUT
+                try await Analyze.analyze(client: app.client, database: app.db, mode: .limit(10))
+
+                // validation
+                let packages = try await Package.query(on: app.db).sort(\.$url).all()
+                #expect(packages.map(\.status) == [.invalidCachePath, .invalidCachePath])
+            }
         }
-
-        // validation
-        logger.logs.withValue {
-            XCTAssertEqual($0, [.init(level: .warning,
-                                      message: #"Ingestion.Error(\#(UUID.id0), invalidURL(1))"#)])
-        }
-    }
-
-    func test_Analyzer_error_reporting() async throws {
-        // setup
-        try await Package(id: .id1, url: "1".asGithubUrl.url, processingStage: .ingestion).save(on: app.db)
-        Current.fileManager.fileExists = { @Sendable _ in true }
-        Current.shell.run = { @Sendable cmd, path in
-            if cmd.description == "git tag" { return "1.0.0" }
-            // returning a blank string will cause an exception when trying to
-            // decode it as the manifest result - we use this to simulate errors
-            return "invalid"
-        }
-
-        // MUT
-        try await Analyze.analyze(client: app.client,
-                                  database: app.db,
-                                  mode: .limit(10))
-
-        // validation
-        logger.logs.withValue {
-            XCTAssertEqual($0, [
-                .init(level: .critical, message: "updatePackages: unusually high error rate: 1/1 = 100.0%"),
-                .init(level: .warning, message: #"App.AppError.genericError(Optional(\#(UUID.id1)), "updateRepository: no repository")"#)
-            ])
-        }
-    }
-
-    func test_invalidPackageCachePath() async throws {
-        // setup
-        try await savePackages(on: app.db, ["1", "2"], processingStage: .ingestion)
-
-        // MUT
-        try await Analyze.analyze(client: app.client,
-                                  database: app.db,
-                                  mode: .limit(10))
-
-        // validation
-        let packages = try await Package.query(on: app.db).sort(\.$url).all()
-        XCTAssertEqual(packages.map(\.status), [.invalidCachePath, .invalidCachePath])
     }
 
 }

@@ -319,7 +319,12 @@ extension API.PackageController.GetRoute.Model {
 
         return .li(
             .class("dependencies"),
-            .text(dependenciesPhrase)
+            .div(
+                .text(dependenciesPhrase)
+            ),
+            .small(
+                .text("Including all transitive and test dependencies.")
+            )
         )
     }
 
@@ -614,7 +619,9 @@ extension API.PackageController.GetRoute.Model {
     }
 
     func noCompatibilityInformationExplainer() -> Node<HTML.BodyContext> {
-        .if(Current.processingBuildBacklog(),
+        @Dependency(\.environment) var environment
+
+        return .if(environment.processingBuildBacklog(),
             .group(
                 .p(
                     .text("This package currently has no compatibility information. "),

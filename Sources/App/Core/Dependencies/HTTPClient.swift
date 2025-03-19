@@ -66,6 +66,11 @@ extension HTTPClient: DependencyKey {
             }
         )
     }
+
+    func get(url: String) async throws -> Response { try await get(url: url, headers: .init()) }
+    func post(url: String, body: Data?) async throws -> Response {
+        try await post(url: url, headers: .init(), body: body)
+    }
 }
 
 
@@ -106,8 +111,24 @@ extension HTTPClient.Response {
         self.init(host: "host", status: status, version: version, headers: headers, body: body)
     }
 
-    static var ok: Self { .init(status: .ok) }
-    static var notFound: Self { .init(status: .notFound) }
     static var badRequest: Self { .init(status: .badRequest) }
+    static var notFound: Self { .init(status: .notFound) }
+    static var tooManyRequests: Self { .init(status: .tooManyRequests) }
+    static var ok: Self { .init(status: .ok) }
+    static var created: Self { .init(status: .created) }
+
+    static func ok(body: String, headers: HTTPHeaders = .init()) -> Self {
+        .init(status: .ok, headers: headers, body: .init(string: body))
+    }
+
+    static func ok<T: Encodable>(jsonEncode value: T, headers: HTTPHeaders = .init()) throws -> Self {
+        let data = try JSONEncoder().encode(value)
+        return .init(status: .ok, headers: headers, body: .init(data: data))
+    }
+
+    static func created<T: Encodable>(jsonEncode value: T, headers: HTTPHeaders = .init()) throws -> Self {
+        let data = try JSONEncoder().encode(value)
+        return .init(status: .created, headers: headers, body: .init(data: data))
+    }
 }
 #endif

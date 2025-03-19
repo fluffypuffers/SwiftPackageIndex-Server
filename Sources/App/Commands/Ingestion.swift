@@ -82,23 +82,27 @@ enum Ingestion {
         var help: String { "Run package ingestion (fetching repository metadata)" }
 
         func run(using context: CommandContext, signature: SPICommand.Signature) async {
+            prepareDependencies {
+                $0.logger = Logger(component: "ingest")
+            }
+            @Dependency(\.logger) var logger
+
             let client = context.application.client
             let db = context.application.db
-            Current.setLogger(Logger(component: "ingest"))
 
             Self.resetMetrics()
 
             do {
                 try await ingest(client: client, database: db, mode: .init(signature: signature))
             } catch {
-                Current.logger().error("\(error.localizedDescription)")
+                logger.error("\(error.localizedDescription)")
             }
 
             do {
                 try await AppMetrics.push(client: client,
                                           jobName: "ingest")
             } catch {
-                Current.logger().warning("\(error.localizedDescription)")
+                logger.warning("\(error.localizedDescription)")
             }
         }
 
@@ -121,20 +125,22 @@ enum Ingestion {
         let start = DispatchTime.now().uptimeNanoseconds
         defer { AppMetrics.ingestDurationSeconds?.time(since: start) }
 
+        @Dependency(\.logger) var logger
+
         switch mode {
             case .id(let id):
-                Current.logger().info("Ingesting (id: \(id)) ...")
+                logger.info("Ingesting (id: \(id)) ...")
                 let pkg = try await Package.fetchCandidate(database, id: id)
                 await ingest(client: client, database: database, packages: [pkg])
 
             case .limit(let limit):
-                Current.logger().info("Ingesting (limit: \(limit)) ...")
+                logger.info("Ingesting (limit: \(limit)) ...")
                 let packages = try await Package.fetchCandidates(database, for: .ingestion, limit: limit)
-                Current.logger().info("Candidate count: \(packages.count)")
+                logger.info("Candidate count: \(packages.count)")
                 await ingest(client: client, database: database, packages: packages)
 
             case .url(let url):
-                Current.logger().info("Ingesting (url: \(url)) ...")
+                logger.info("Ingesting (url: \(url)) ...")
                 let pkg = try await Package.fetchCandidate(database, url: url)
                 await ingest(client: client, database: database, packages: [pkg])
         }
@@ -150,7 +156,8 @@ enum Ingestion {
     static func ingest(client: Client,
                        database: Database,
                        packages: [Joined<Package, Repository>]) async {
-        Current.logger().debug("Ingesting \(packages.compactMap {$0.model.id})")
+        @Dependency(\.logger) var logger
+        logger.debug("Ingesting \(packages.compactMap {$0.model.id})")
         AppMetrics.ingestCandidatesCount?.set(packages.count)
 
         await withTaskGroup(of: Void.self) { group in
@@ -164,14 +171,15 @@ enum Ingestion {
 
 
     static func ingest(client: Client, database: Database, package: Joined<Package, Repository>) async {
+        @Dependency(\.logger) var logger
         let result = await Result { () async throws(Ingestion.Error) -> Joined<Package, Repository> in
             @Dependency(\.environment) var environment
-            Current.logger().info("Ingesting \(package.package.url)")
+            logger.info("Ingesting \(package.package.url)")
 
             // Even though we have a `Joined<Package, Repository>` as a parameter, we must not rely
             // on `repository` for owner/name as it will be nil when a package is first ingested.
             // The only way to get `owner` and `repository` here is by parsing them from the URL.
-            let (owner, repository) = try await run {
+            let (owner, repository) = try run {
                 if environment.shouldFail(failureMode: .invalidURL) {
                     throw Github.Error.invalidURL(package.model.url)
                 }
@@ -181,7 +189,7 @@ enum Ingestion {
             }
 
             let (metadata, license, readme) = try await run {
-                try await fetchMetadata(client: client, package: package.model, owner: owner, repository: repository)
+                try await fetchMetadata(package: package.model, owner: owner, repository: repository)
             } rethrowing: {
                 Ingestion.Error(packageId: package.model.id!,
                                 underlyingError: .fetchMetadataFailed(owner: owner, name: repository, details: "\($0)"))
@@ -190,10 +198,10 @@ enum Ingestion {
 
             let s3Readme: S3Readme?
             do throws(S3Readme.Error) {
-                s3Readme = try await storeS3Readme(client: client, repository: repo, metadata: metadata, readme: readme)
+                s3Readme = try await storeS3Readme(repository: repo, metadata: metadata, readme: readme)
             } catch {
                 // We don't want to fail ingestion in case storing the readme fails - warn and continue.
-                Current.logger().warning("storeS3Readme failed: \(error)")
+                logger.warning("storeS3Readme failed: \(error)")
                 s3Readme = .error("\(error)")
             }
 
@@ -217,7 +225,7 @@ enum Ingestion {
         do {
             try await updatePackage(client: client, database: database, result: result, stage: .ingestion)
         } catch {
-            Current.logger().report(error: error)
+            logger.report(error: error)
         }
     }
 
@@ -239,15 +247,16 @@ enum Ingestion {
     }
 
 
-    static func storeS3Readme(client: Client, repository: Repository, metadata: Github.Metadata, readme: Github.Readme?) async throws(S3Readme.Error) -> S3Readme? {
+    static func storeS3Readme(repository: Repository, metadata: Github.Metadata, readme: Github.Readme?) async throws(S3Readme.Error) -> S3Readme? {
+        @Dependency(\.s3) var s3
         if let upstreamEtag = readme?.etag,
            repository.s3Readme?.needsUpdate(upstreamEtag: upstreamEtag) ?? true,
            let owner = metadata.repositoryOwner,
            let repository = metadata.repositoryName,
            let html = readme?.html {
-            let objectUrl = try await Current.storeS3Readme(owner, repository, html)
+            let objectUrl = try await s3.storeReadme(owner, repository, html)
             if let imagesToCache = readme?.imagesToCache, imagesToCache.isEmpty == false {
-                try await Current.storeS3ReadmeImages(client, imagesToCache)
+                try await s3.storeReadmeImages(imagesToCache)
             }
             return .cached(s3ObjectUrl: objectUrl, githubEtag: upstreamEtag)
         } else {
@@ -256,16 +265,22 @@ enum Ingestion {
     }
 
 
-    static func fetchMetadata(client: Client, package: Package, owner: String, repository: String) async throws(Github.Error) -> (Github.Metadata, Github.License?, Github.Readme?) {
+    static func fetchMetadata(package: Package, owner: String, repository: String) async throws(Github.Error) -> (Github.Metadata, Github.License?, Github.Readme?) {
         @Dependency(\.environment) var environment
-        @Dependency(\.github) var github
         if environment.shouldFail(failureMode: .fetchMetadataFailed) {
             throw Github.Error.requestFailed(.internalServerError)
         }
 
-        async let metadata = try await Current.fetchMetadata(client, owner, repository)
-        async let license = await github.fetchLicense(owner, repository)
-        async let readme = await Current.fetchReadme(client, owner, repository)
+        // Need to pull in github functions individually, because otherwise the `async let` will trigger a
+        // concurrency error if github gets used more than once:
+        //   Sending 'github' into async let risks causing data races between async let uses and local uses
+        @Dependency(\.github.fetchMetadata) var fetchMetadata
+        @Dependency(\.github.fetchLicense) var fetchLicense
+        @Dependency(\.github.fetchReadme) var fetchReadme
+
+        async let metadata = try await fetchMetadata(owner, repository)
+        async let license = await fetchLicense(owner, repository)
+        async let readme = await fetchReadme(owner, repository)
 
         do {
             return try await (metadata, license, readme)

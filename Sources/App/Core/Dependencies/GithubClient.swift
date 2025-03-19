@@ -14,26 +14,42 @@
 
 
 import Dependencies
-import DependenciesMacros
+import IssueReporting
+import Vapor
 
 
-@DependencyClient
+// We currently cannot use @DependencyClient here due to
+// https://github.com/pointfreeco/swift-dependencies/discussions/324
+//@DependencyClient
 struct GithubClient {
     var fetchLicense: @Sendable (_ owner: String, _ repository: String) async -> Github.License?
+    var fetchMetadata: @Sendable (_ owner: String, _ repository: String) async throws(Github.Error) -> Github.Metadata = { _,_ in reportIssue("fetchMetadata"); return .init() }
+    var fetchReadme: @Sendable (_ owner: String, _ repository: String) async -> Github.Readme?
+    var token: @Sendable () -> String?
 }
 
 
 extension GithubClient: DependencyKey {
     static var liveValue: Self {
         .init(
-            fetchLicense: { owner, repo in await Github.fetchLicense(owner: owner, repository: repo) }
+            fetchLicense: { owner, repo in await Github.fetchLicense(owner: owner, repository: repo) },
+            fetchMetadata: { owner, repo throws(Github.Error) in try await Github.fetchMetadata(owner: owner, repository: repo) },
+            fetchReadme: { owner, repo in await Github.fetchReadme(owner: owner, repository: repo) },
+            token: { Environment.get("GITHUB_TOKEN") }
         )
     }
 }
 
 
 extension GithubClient: TestDependencyKey {
-    static var testValue: Self { Self() }
+    static var testValue: Self {
+        .init(
+            fetchLicense: { _, _ in unimplemented("fetchLicense"); return nil },
+            fetchMetadata: { _, _ in unimplemented("fetchMetadata"); return .init() },
+            fetchReadme: { _, _ in unimplemented("fetchReadme"); return nil },
+            token: { unimplemented("token"); return nil }
+        )
+    }
 }
 
 

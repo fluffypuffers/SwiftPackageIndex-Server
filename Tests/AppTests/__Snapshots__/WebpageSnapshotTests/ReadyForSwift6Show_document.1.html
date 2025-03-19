@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en"><!--Version: test--><!--DB Id: db-id-->
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8"/>
+    <meta property="og:site_name" content="The Swift Package Index"/>
+    <link rel="canonical" href="http://localhost:8080/"/>
+    <meta name="twitter:url" content="http://localhost:8080/"/>
+    <meta property="og:url" content="http://localhost:8080/"/>
+    <title>Ready for Swift 6 &ndash; Swift Package Index</title>
+    <meta name="twitter:title" content="Ready for Swift 6 &ndash; Swift Package Index"/>
+    <meta property="og:title" content="Ready for Swift 6 &ndash; Swift Package Index"/>
+    <meta name="description" content="The Swift Package Index is the place to find the best Swift packages."/>
+    <meta name="twitter:description" content="The Swift Package Index is the place to find the best Swift packages."/>
+    <meta property="og:description" content="The Swift Package Index is the place to find the best Swift packages."/>
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:image" content="http://localhost:8080/images/logo.png"/>
+    <meta property="og:image" content="http://localhost:8080/images/logo.png"/>
+    <link rel="shortcut icon" href="/images/logo-tiny.png" type="image/png"/>
+    <link rel="alternate" type="application/rss+xml" title="Swift Package Index Blog" href="http://localhost:8080/blog/feed.xml"/>
+    <link rel="alternate" type="application/rss+xml" title="Swift Package Index – Recently Added Packages" href="http://localhost:8080/packages.rss"/>
+    <link rel="alternate" type="application/rss+xml" title="Swift Package Index – Recent Package Releases" href="http://localhost:8080/releases.rss"/>
+    <link rel="alternate" type="application/rss+xml" title="Swift Package Index – Recent Major Package Releases" href="http://localhost:8080/releases.rss?major=true"/>
+    <link rel="alternate" type="application/rss+xml" title="Swift Package Index – Recent Major & Minor Package Releases" href="http://localhost:8080/releases.rss?major=true&minor=true"/>
+    <link rel="alternate" type="application/rss+xml" title="Swift Package Index – Recent Package Pre-Releases" href="http://localhost:8080/releases.rss?pre=true"/>
+    <link rel="stylesheet" href="/shared.css?test" data-turbolinks-track="reload"/>
+    <link rel="stylesheet" href="/main.css?test" data-turbolinks-track="reload"/>
+    <script src="/shared.js?test" data-turbolinks-track="reload" defer></script>
+    <script src="/main.js?test" data-turbolinks-track="reload" defer></script><script async defer data-domain="swiftpackageindex.com" src="https://plausible.io/js/plausible.outbound-links.js"></script>
+<script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+  </head>
+  <body>
+    <header>
+      <div class="inner">
+        <a href="/">
+          <h1>
+            <img alt="The Swift Package Index logo." src="/images/logo.svg"/>Swift Package Index
+          </h1>
+        </a>
+        <nav>
+          <ul>
+            <li>
+              <a class="supporters" href="/supporters">Supporters</a>
+            </li>
+            <li>
+              <a href="/add-a-package">Add a Package</a>
+            </li>
+            <li>
+              <a href="/blog">Blog</a>
+            </li>
+            <li>
+              <a href="/faq">FAQ</a>
+            </li>
+            <li class="search">
+              <form action="/search">
+                <input id="query" name="query" type="search" placeholder="Search" spellcheck="false" autocomplete="off" data-gramm="false" data-focus="false"/>
+                <button type="submit">
+                  <div title="Search"></div>
+                </button>
+              </form>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <p class="announcement">Track the adoption of Swift 6 strict concurrency checks for data race safety. How many packages are 
+      <a href="/ready-for-swift-6">Ready for Swift 6</a>?
+    </p>
+    <nav class="breadcrumbs">
+      <div class="inner">
+        <ul>
+          <li>
+            <a href="/">
+              <span>Home</span>
+            </a>
+          </li>
+          <li>
+            <span>Ready for Swift 6</span>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <main>
+      <div class="inner">
+        <h2>Ready for Swift 6</h2>
+        <p>The Swift 6 language mode prevents data races at compile time. When you opt into Swift 6 mode, the compiler will produce errors when your code has a risk of concurrent access, turning hard-to-debug runtime failures into compiler errors.</p>
+        <p>To track the progress of the Swift package ecosystem, the Swift Package Index is running regular package compatibility checks across all packages in the index.</p>
+        <p>For help migrating your project's code, see the 
+          <a href="https://www.swift.org/migration/documentation/migrationguide/">Swift 6 language mode migration guide</a>.
+        </p>
+        <h3 id="total-zero-errors">Total packages with Swift 6 zero data race safety errors</h3>
+        <p>This chart shows packages with zero data race safety compiler diagnostics during a successful build on at least one tested platform.</p>
+        <div data-controller="vega-chart" data-vega-chart-class-value="CompatiblePackagesChart" data-include-totals="true">
+          <script data-vega-chart-target="plotData" type="application/json">[{"id":"all","name":"All packages","total":3395,"values":[{"date":"2024-05-04","toolchainId":"org.swift.600202404221a","toolchainLabel":"Swift 6.0 Development Snapshot 2024-04-22 (a)","value":1295}]}]</script>
+          <script data-vega-chart-target="eventData" type="application/json">[{"date":"2024-06-10","value":"Xcode 16 beta 1 released at WWDC '24"}]</script>
+        </div>
+        <h3 id="total-errors">Total Swift 6 data race safety errors</h3>
+        <p>This chart shows the total number of all data race safety diagnostics across 
+          <em>all</em> packages.
+        </p>
+        <div data-controller="vega-chart" data-vega-chart-class-value="TotalErrorsChart" data-include-totals="false">
+          <script data-vega-chart-target="plotData" type="application/json">[{"id":"all","name":"All packages","total":3395,"values":[{"date":"2024-05-04","toolchainId":"org.swift.600202404221a","toolchainLabel":"Swift 6.0 Development Snapshot 2024-04-22 (a)","value":56911}]}]</script>
+          <script data-vega-chart-target="eventData" type="application/json">[{"date":"2024-06-10","value":"Xcode 16 beta 1 released at WWDC '24"}]</script>
+        </div>
+        <h3 id="faq">Frequently asked questions</h3>
+        <p>
+          <strong>Q: </strong>What is a “data race safety error”?
+        </p>
+        <p>
+          <strong>A: </strong>Swift 6 introduces complete concurrency checking, a compiler feature that checks your code for data race safety. The number of data race safety errors reflects how many issues the compiler detected relating to these concurrency or data race checks. The total errors chart plots the total number of these errors summed across all packages.
+        </p>
+        <hr class="minor"/>
+        <p>
+          <strong>Q: </strong>Are additional parameters added to the build command for these tests compared to the “standard” Swift Package Index builds that determine Swift version compatibility on package pages?
+        </p>
+        <p>
+          <strong>A: </strong>Yes. These charts plot the status of packages as if every package had opted in to the Swift 6 language mode and enabled “complete” concurrency checking. We pass 
+          <code>-strict-concurrency=complete</code> to either 
+          <code>swift build</code> or 
+          <code>xcodebuild</code> to achieve this by enabling all data race safety checks in the compiler.
+        </p>
+        <hr class="minor"/>
+        <p>
+          <strong>Q: </strong>Are packages that show zero data race compiler diagnostics guaranteed to be safe from data race errors?
+        </p>
+        <p>
+          <strong>A: </strong>No. We gather data on data race safety from Swift compiler diagnostics with “complete” concurrency checks enabled. We can’t tell if the diagnostics produce zero errors due to a genuine lack of data race safety errors or whether errors have been suppressed using techniques like 
+          <code>@unchecked Sendable</code>.
+        </p>
+        <hr class="minor"/>
+        <p>
+          <strong>Q: </strong>Why use 
+          <code>-strict-concurrency=complete</code> instead of 
+          <code>-swift-version 6</code>?
+        </p>
+        <p>
+          <strong>A: </strong>Data race safety diagnostics are determined in different stages of the compiler. For example, type checking produces some data race safety errors, and others are diagnosed during control-flow analysis after code generation. If type checking produces errors, the compiler will not proceed to code generation, so testing with 
+          <code>-swift-version 6</code> would show fewer errors than really exist across the package ecosystem.
+        </p>
+        <hr class="minor"/>
+        <p>
+          <strong>Q: </strong>What packages are in the “all packages” data set?
+        </p>
+        <p>
+          <strong>A: </strong>We are not testing every package in the index. Instead, we are testing packages that are under some kind of active development. For this test, we define “all packages” in the chart to be any package having at least one commit to their repository in the last year. We took a snapshot of active packages on the 19th of March 2024, and the “all packages” data set includes 3,395 packages. The data set also excludes any new packages added after the 19th March.
+        </p>
+        <hr class="minor"/>
+        <p>
+          <strong>Q: </strong>What packages are in the “Apple packages” and “SSWG incubated packages” data sets?
+        </p>
+        <p>
+          <strong>A: </strong>It’s interesting to look at some slices of curated package lists in addition to overall compatibility. Apple should be leading from the front, so the “Apple packages” data set is 
+          <a href="/apple">all packages authored by Apple</a>, again with the same criteria as above applied. Nothing newer than March 19th and nothing without commits in the last year. The SSWG incubated data set is the same idea but sourced from the 
+          <a href="https://www.swift.org/sswg/incubated-packages.html">Swift Server Workgroup incubated packages list</a>.
+        </p>
+      </div>
+    </main>
+    <footer>
+      <div class="inner">
+        <nav>
+          <ul>
+            <li>
+              <a href="/blog">Blog</a>
+            </li>
+            <li>
+              <a href="https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server">GitHub</a>
+            </li>
+            <li>
+              <a href="/privacy">Privacy</a>
+            </li>
+            <li>
+              <a href="https://swiftpackageindex.statuspage.io">System Status</a>
+            </li>
+            <li>
+              <a href="/build-monitor">Build System Monitor</a>
+            </li>
+            <li>
+              <a href="https://mas.to/@SwiftPackageIndex">Mastodon</a>
+            </li>
+            <li>
+              <a href="https://swiftpackageindexing.transistor.fm">Podcast</a>
+            </li>
+            <li>
+              <a href="/ready-for-swift-6">Ready for Swift 6</a>
+            </li>
+          </ul>
+          <small>The Swift Package Index is entirely funded by community sponsorship. Thank you to 
+            <a href="https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server#funding-and-sponsorship">all our sponsors for their generosity</a>.
+          </small>
+          <small>The Swift Package Index is operated by SPI Operations Limited, a company registered in the UK with company number 13466692.</small>
+          <a rel="me" href="https://mas.to/@SwiftPackageIndex"></a>
+          <a rel="me" href="https://mas.to/@SwiftPackageUpdates"></a>
+        </nav>
+      </div>
+    </footer>
+    <spi-debug-panel class="hidden">
+      <table>
+        <tbody></tbody>
+      </table>
+    </spi-debug-panel>
+  </body>
+</html>

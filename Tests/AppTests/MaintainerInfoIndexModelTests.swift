@@ -14,42 +14,50 @@
 
 @testable import App
 
-import XCTVapor
+import Dependencies
+import DependenciesTestSupport
 import SnapshotTesting
+import Testing
 
 
-class MaintainerInfoIndexModelTests: SnapshotTestCase {
+extension AllTests.MaintainerInfoIndexModelTests {
 
-    func test_badgeURL() throws {
-        Current.siteURL = { "https://spi.com" }
-        let model = MaintainerInfoIndex.Model.mock
+    @Test func badgeURL() throws {
+        withDependencies {
+            $0.environment.siteURL = { "https://spi.com" }
+        } operation: {
+            let model = MaintainerInfoIndex.Model.mock
 
-        XCTAssertEqual(model.badgeURL(for: .swiftVersions), "https://img.shields.io/endpoint?url=https%3A%2F%2Fspi.com%2Fapi%2Fpackages%2Fexample%2Fpackage%2Fbadge%3Ftype%3Dswift-versions")
-        XCTAssertEqual(model.badgeURL(for: .platforms), "https://img.shields.io/endpoint?url=https%3A%2F%2Fspi.com%2Fapi%2Fpackages%2Fexample%2Fpackage%2Fbadge%3Ftype%3Dplatforms")
+            #expect(model.badgeURL(for: .swiftVersions) == "https://img.shields.io/endpoint?url=https%3A%2F%2Fspi.com%2Fapi%2Fpackages%2Fexample%2Fpackage%2Fbadge%3Ftype%3Dswift-versions")
+            #expect(model.badgeURL(for: .platforms) == "https://img.shields.io/endpoint?url=https%3A%2F%2Fspi.com%2Fapi%2Fpackages%2Fexample%2Fpackage%2Fbadge%3Ftype%3Dplatforms")
+        }
     }
 
-    func test_badgeMarkdown() throws {
+    @Test func badgeMarkdown() throws {
         // Test badge markdown structure
-        Current.siteURL = { "https://spi.com" }
-        let model = MaintainerInfoIndex.Model.mock
+        withDependencies {
+            $0.environment.siteURL = { "https://spi.com" }
+        } operation: {
+            let model = MaintainerInfoIndex.Model.mock
 
-        let badgeURL = model.badgeURL(for: .swiftVersions)
-        XCTAssertEqual(model.badgeMarkdown(for: .swiftVersions), "[![](\(badgeURL))](https://spi.com/example/package)")
+            let badgeURL = model.badgeURL(for: .swiftVersions)
+            #expect(model.badgeMarkdown(for: .swiftVersions) == "[![](\(badgeURL))](https://spi.com/example/package)")
+        }
     }
 
-    func test_scoreCategories_dependencies() throws {
+    @Test func scoreCategories_dependencies() throws {
         // setup
         var model = MaintainerInfoIndex.Model.mock
 
         do {
             model.scoreDetails?.numberOfDependencies = 0
-            let categories = model.scoreCategories
-            XCTAssertEqual(categories["Dependencies"]?.description, "Has no dependencies.")
+            let categories = model.scoreCategories()
+            #expect(categories["Dependencies"]?.description == "Has no dependencies.")
         }
         do {
             model.scoreDetails?.numberOfDependencies = nil
-            let categories = model.scoreCategories
-            XCTAssertEqual(categories["Dependencies"]?.description, "No dependency information available.")
+            let categories = model.scoreCategories()
+            #expect(categories["Dependencies"]?.description == "No dependency information available.")
         }
     }
 

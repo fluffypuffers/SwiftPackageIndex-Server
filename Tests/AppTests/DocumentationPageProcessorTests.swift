@@ -12,54 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import XCTest
-
 @testable import App
 
+import Dependencies
 import InlineSnapshotTesting
 import SwiftSoup
+import Testing
 
 
-final class DocumentationPageProcessorTests: AppTestCase {
+extension AllTests.DocumentationPageProcessorTests {
 
-    func test_header_linkTitle() throws {
+    @Test func header_linkTitle() throws {
         // https://github.com/SwiftPackageIndex/SwiftPackageIndex-Server/issues/2249
-        // setup
-        let coreArchive = DocArchive(name: "tecocore", title: "TecoCore")
-        let signerArchive = DocArchive(name: "tecosigner", title: "Teco Signer")
-        let archives: [DocumentationPageProcessor.AvailableArchive] = [
-            .init(archive: coreArchive, isCurrent: false),
-            .init(archive: signerArchive, isCurrent: true)
-        ]
-        let processor = try XCTUnwrap(
-            DocumentationPageProcessor(
-                repositoryOwner: "owner",
-                repositoryOwnerName: "Owner Name",
-                repositoryName: "repo",
-                packageName: "package",
-                docVersion: .reference("main"),
-                referenceLatest: .release,
-                referenceKind: .release,
-                canonicalUrl: "https://example.com/owner/repo/canonical-ref",
-                availableArchives: archives,
-                availableVersions: [
-                    .init(
-                        kind: .defaultBranch,
-                        reference: "main",
-                        docArchives: [coreArchive, signerArchive],
-                        isLatestStable: false
-                    )
-                ],
-                updatedAt: .t0,
-                rawHtml: try fixtureString(for: "docc-template.html")
+        try withDependencies {
+            $0.timeZone = .utc
+        } operation: {
+            // setup
+            let coreArchive = DocArchive(name: "tecocore", title: "TecoCore")
+            let signerArchive = DocArchive(name: "tecosigner", title: "Teco Signer")
+            let archives: [DocumentationPageProcessor.AvailableArchive] = [
+                .init(archive: coreArchive, isCurrent: false),
+                .init(archive: signerArchive, isCurrent: true)
+            ]
+            let processor = try #require(
+                DocumentationPageProcessor(
+                    repositoryOwner: "owner",
+                    repositoryOwnerName: "Owner Name",
+                    repositoryName: "repo",
+                    packageName: "package",
+                    docVersion: .reference("main"),
+                    referenceLatest: .release,
+                    referenceKind: .release,
+                    canonicalUrl: "https://example.com/owner/repo/canonical-ref",
+                    availableArchives: archives,
+                    availableVersions: [
+                        .init(
+                            kind: .defaultBranch,
+                            reference: "main",
+                            docArchives: [coreArchive, signerArchive],
+                            isLatestStable: false
+                        )
+                    ],
+                    updatedAt: .t0,
+                    rawHtml: try fixtureString(for: "docc-template.html")
+                )
             )
-        )
 
-        // MUT & validate
-        assertSnapshot(of: processor.header, as: .html)
+            // MUT & validate
+            assertSnapshot(of: processor.header, as: .html)
+        }
     }
 
-    func test_rewriteBaseUrls() throws {
+    @Test func rewriteBaseUrls() throws {
         // Test rewriting of a `baseURL = "/"` (dynamic hosting) index.html
         let html = try fixtureString(for: "doc-index-dynamic-hosting.html")
         do {
@@ -79,7 +83,7 @@ final class DocumentationPageProcessorTests: AppTestCase {
         }
     }
 
-    func test_rewriteScriptBaseUrl() throws {
+    @Test func rewriteScriptBaseUrl() throws {
         do {  // test rewriting of "/" base url
             let doc = try SwiftSoup.parse(#"""
                 <script>var baseUrl = "/"</script>
@@ -114,7 +118,7 @@ final class DocumentationPageProcessorTests: AppTestCase {
         }
     }
 
-    func test_rewriteScriptBaseUrl_whiteSpace() throws {
+    @Test func rewriteScriptBaseUrl_whiteSpace() throws {
         // test rewriting of "/" base url with whitespace
         do {
             let doc = try SwiftSoup.parse(#"""
@@ -187,8 +191,8 @@ final class DocumentationPageProcessorTests: AppTestCase {
             }
         }
     }
-    
-    func test_rewriteAttribute_current() throws {
+
+    @Test func rewriteAttribute_current() throws {
         do {  // test rewriting of un-prefixed src attributes
             let doc = try SwiftSoup.parse(#"""
                 <script src="/js/index-1.js"></script>
@@ -246,7 +250,7 @@ final class DocumentationPageProcessorTests: AppTestCase {
         }
     }
 
-    func test_rewriteAttribute_toReference() throws {
+    @Test func rewriteAttribute_toReference() throws {
         do {  // test rewriting of un-prefixed src attributes
             let doc = try SwiftSoup.parse(#"""
                 <script src="/js/index-1.js"></script>

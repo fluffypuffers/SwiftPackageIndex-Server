@@ -38,6 +38,14 @@ Close the scheme editor and run the application by selecting "Run" from the Xcod
 [ NOTICE ] Server starting on http://127.0.0.1:8080 [component: server]
 ```
 
+When Xcode opens the `Package.swift` file, it will auto-create a test plan based on all tests in the project. This works for most cases, but we need to tell Xcode to run our tests sequentially, not in parallel. The first thing to do is to persist the autocreated test plan. From the Product menu, select "Test Plan" then "Manage Test Plans...", then click the small arrow button:
+
+![A screenshot of Xcode's scheme editor showing a small arrow next to 'SPI-Server-Package (Autocreated)'.](.readme-images/manage-test-plans.png)
+
+Once you open the autocreated test plan, you will be asked if you would like to persist the test plan. Click "Save" and accept the default location in the `.swiftpm` directory. Then, for each item in the test plan, click the "Options" and select "Disabled" for the "Paralellization" setting.
+
+![A screenshot of Xcode's test plan editor showing the parallelization options.](.readme-images/test-plan-options.png)
+
 When working locally, it's helpful to have a database with pre-populated data from the live system. [Talk to us on Discord](https://discord.gg/vQRb6KkYRw), and we'll supply you with a recent database dump that you can load with `./scripts/load-db.sh`.
 
 ### Setup the Front End
@@ -204,6 +212,18 @@ Note that this will launch several services defined in `app.yml`, including the 
 env VERSION=... docker-compose -f app.yml up -d server
 ```
 
+The site uses Redis as a local reference cache for some of the documentation resolution(`getDocRoute`).
+In the code, it's handled as an in-memory cache when running in DEBUG mode.
+Redis is not required to run the site locally - it's an optimization for the production setup.
+
+You can run an instance of redis in docker locally, should you want to leverage or work on that section:
+
+```
+make redis-up-dev
+```
+
+Use `make redis-down-dev` to cleanly disable the local redis instance.
+
 ## Running in a Linux container
 
 Sometimes you need to run tests or even the server on the target platform, Linux. The best way to do that is to build and run in a Linux container.
@@ -216,7 +236,7 @@ The trickiest part of this is to ensure the test or app container can connect to
 So, in order to run the tests in a Linux container run:
 
 ```
-docker run --rm -v "$PWD":/host -w /host --add-host=host.docker.internal:host-gateway registry.gitlab.com/finestructure/spi-base:1.1.0 swift test
+docker run --rm -v "$PWD":/host -w /host --add-host=host.docker.internal:host-gateway registry.gitlab.com/finestructure/spi-base:1.1.1 swift test
 ```
 
 Make sure you use the most recent `spi-base` image. You can find the latest image name in the `test-docker` target, which also provides a convenient way to run all all tests in a docker container.
@@ -297,3 +317,5 @@ psql 'postgres://spi_test@host.docker.internal:5432/spi_test' -c 'select count(*
 # check connection for spi_dev database:
 psql 'postgres://spi_dev@host.docker.internal:6432/spi_dev' -c 'select count(*) from packages;'
 ```
+
+##
